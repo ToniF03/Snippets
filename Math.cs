@@ -1,3 +1,4 @@
+using System.Globalization;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -124,7 +125,6 @@ namespace uCalc
                     }
                 }
             }
-
             public static class Mass
             {
                 public static class Ton
@@ -145,19 +145,19 @@ namespace uCalc
                     {
                         return ton * 1000000000000;
                     }
-                    public static double ToLongTons(double ton)
+                    public static double ToLongTon(double ton)
                     {
                         return ton / 1.016;
                     }
-                    public static double ToShortTons(double ton)
+                    public static double ToShortTon(double ton)
                     {
                         return ton / 1.102;
                     }
-                    public static double ToStones(double ton)
+                    public static double ToStone(double ton)
                     {
                         return ton / 157.473;
                     }
-                    public static double ToPounds(double ton)
+                    public static double ToPound(double ton)
                     {
                         return ton / 0.00045359237;
                     }
@@ -520,116 +520,95 @@ namespace uCalc
             }
         }
 
+        /// <summary>
+        /// Calculates a string based math task. Accepts brackets, exponentials and obeys math rules.
+        /// </summary>
+        /// <param name="task">The task string to be calculated</param>
+        /// <returns></returns>
         public static double CalculateString(string task)
         {
-            if (!new Regex(@"([\*\/\+][\*\/\+\)])").IsMatch(task) && !task.Contains("()") && !new Regex(@"\d{1,},\d{1,},").IsMatch(task))
+            task = task.Trim();
+            while (task.Contains("  "))
+                task = task.Replace("  ", "");
+
+            bool unclosedBrackets = task.Count(c => c == '(') != task.Count(c => c == ')');
+            bool onlyValidCharacters = new Regex(@"^(\d+(\.\d+)?|\+|\-|\*|\/|\^|\(|\))*$").IsMatch(task);
+            bool wrongFormat = new Regex(@"((\+|\-|\*|\/|\(|^)(\^|\)|$)|(\^|\/|\()($|\+|\*|\/|\))|(\/|\*)(\/|\*)|\d\(|\)\d|\($)").IsMatch(task);
+            bool rightSyntax = onlyValidCharacters && !wrongFormat && !unclosedBrackets;
+            if (rightSyntax)
             {
-                string _task = task;
-                Regex regex = new Regex(@"(\([0-9,\+\-\*\/]{1,}\))(?!.*\1)");
-
-                if (new Regex(@"([0-9]\()").IsMatch(_task))
+                // Exponents
+                foreach (Match match in new Regex(@"(\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)\^(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)").Matches(task))
                 {
-                    string s = new Regex(@"([0-9]\()").Match(_task).ToString();
-                    _task = _task.Replace(s, s.Substring(0, s.Length - 1) + "*)");
+                    string[] splittedTask = match.Value.Split('^');
+                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
+                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
+                    double result = System.Math.Pow(firstNumber, secondNumber);
+                    if ((firstNumber < 0 && secondNumber < 0) || (firstNumber > 0 && secondNumber < 0 && secondNumber % 2 != 0))
+                        result = result * -1;
+
+                    task = task.Replace(match.Value, result.ToString("N5").Replace(",", "."));
                 }
 
-                while (regex.IsMatch(_task))
+                // Brackets
+                while (task.Contains('('))
                 {
-                    string intermediateTask = regex.Match(_task).ToString();
-                    _task = _task.Replace(intermediateTask, CalculateString(intermediateTask.Substring(1, intermediateTask.Length - 2)).ToString());
+                    string subtask = new Regex(@"\((\d|\.|\+|\-|\*|\/)*\)").Match(task).Value;
+                    task = task.Replace(subtask, CalculateString(subtask.Substring(1, subtask.Length - 2)).ToString("N5").Replace(",", "."));
                 }
 
-                regex = new Regex(@"(([^0-9]\-(\d{1,},\d{1,}|\d{1,})|(\d{1,},\d{1,}|\d{1,}))[\/\*](\-(\d{1,},\d{1,}|\d{1,})|(\d{1,},\d{1,}|\d{1,})))");
-                string intermediateTask2 = regex.Match(_task).ToString();
-
-                while (_task.Contains('*') || _task.Contains('/'))
+                // Multiply / Divide
+                while (task.Contains('*') || task.Contains('/'))
                 {
-                    if (intermediateTask2.Contains("/"))
+                    string subtask = new Regex(@"((\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)(\*|\/)(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)){1}").Match(task).Value;
+                    char op = subtask.Contains("*") ? '*' : '/';
+                    string[] splittedTask = subtask.Split(op);
+                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
+                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
+                    double result = op == '*' ? firstNumber * secondNumber : firstNumber / secondNumber;
+                    //task = task.Replace(subtask, result.ToString("N5").Replace(",", "."));
+                    char[] subtask2Chars = subtask.ToCharArray();
+                    string newPattern = "";
+                    foreach (char c in subtask2Chars)
                     {
-                        double Number1 = 0;
-                        double Number2 = 0;
-
-                        string[] splitted = intermediateTask2.Split('/');
-
-                        if (splitted[0].Substring(0, 1) == "(" || splitted[0].Substring(0, 1) == "+" || (splitted[0].Length >= 2 && splitted[0].Substring(0, 2) == "--")) splitted[0] = splitted[0].Substring(1);
-                        if (intermediateTask2.Substring(0, 1) == "(" || intermediateTask2.Substring(0, 1) == "+" || intermediateTask2.Substring(0, 2) == "--") intermediateTask2 = intermediateTask2.Substring(1);
-
-                        Number1 = double.Parse(splitted[0]);
-                        Number2 = double.Parse(splitted[1]);
-
-                        if (Number2 != 0)
-                            _task = _task.Replace(intermediateTask2, (Number1 / Number2).ToString());
+                        if (new Regex(@"\d").IsMatch(c.ToString()))
+                            newPattern = newPattern + c;
                         else
-                            return double.NaN;
-
-                        intermediateTask2 = regex.Match(_task).ToString();
+                            newPattern = newPattern + "\\" + c;
                     }
-                    else if (intermediateTask2.Contains("*"))
-                    {
-                        double Number1 = 0;
-                        double Number2 = 0;
-
-                        string[] splitted = intermediateTask2.Split('*');
-
-                        if (splitted[0].Substring(0, 1) == "(" || splitted[0].Substring(0, 1) == "+" || (splitted[0].Length >= 2 && splitted[0].Substring(0, 2) == "--")) splitted[0] = splitted[0].Substring(1);
-
-
-                        Number1 = double.Parse(splitted[0]);
-                        Number2 = double.Parse(splitted[1]);
-
-                        _task = _task.Replace(intermediateTask2, (Number1 * Number2).ToString());
-
-                        intermediateTask2 = regex.Match(_task).ToString();
-                    }
+                    task = new Regex(newPattern).Replace(task, result.ToString("N5").Replace(',', '.'), 1);
                 }
 
-                regex = new Regex(@"((\-(\d{1,},\d{1,}|\d{1,})|(\d{1,},\d{1,}|\d{1,}))[\+\-](\-(\d{1,},\d{1,}|\d{1,})|(\d{1,},\d{1,}|\d{1,})))");
-                intermediateTask2 = regex.Match(_task).ToString();
-
-                if (!new Regex(@"^(\d+|\d+,\d+)$").IsMatch(_task.Substring(1)))
+                // Summation / Substraction
+                while ((task.Contains('+') || task.Contains('-')) && !(new Regex(@"^\-\d+(\.\d+)?$").IsMatch(task)))
                 {
-                    while ((_task.Contains('-') || _task.Contains('+')) && !new Regex(@"^(\d+|\d+,\d+)$").IsMatch(_task.Substring(1)))
+                    string subtask = new Regex(@"((\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)(\+|\-)(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)){1}").Match(task).Value;
+                    char op = subtask.Contains("+") ? '+' : '-';
+                    string[] splittedTask = subtask.Split(op);
+                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
+                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
+                    double result = op == '+' ? firstNumber + secondNumber : firstNumber - secondNumber;
+                    //task = task.Replace(subtask, result.ToString("N5").Replace(",", "."));
+                    char[] subtask2Chars = subtask.ToCharArray();
+                    string newPattern = "";
+                    foreach (char c in subtask2Chars)
                     {
-                        if (intermediateTask2.Contains("+"))
-                        {
-                            double Number1 = 0;
-                            double Number2 = 0;
-
-                            string[] splitted = intermediateTask2.Split('+');
-
-                            if (splitted[0].Substring(0, 1) == "(") splitted[0] = splitted[0].Substring(1);
-
-                            Number1 = double.Parse(splitted[0]);
-                            Number2 = double.Parse(splitted[1]);
-
-                            _task = _task.Replace(intermediateTask2, (Number1 + Number2).ToString());
-
-                            intermediateTask2 = regex.Match(_task).ToString();
-                        }
-                        else if (intermediateTask2.Contains("-"))
-                        {
-                            double Number1 = 0;
-                            double Number2 = 0;
-
-                            string[] splitted = intermediateTask2.Split('-');
-
-                            if (splitted[0] != "" && splitted[0].Substring(0, 1) == "(") splitted[0] = splitted[0].Substring(1);
-
-                            if (splitted[0] == "") Number1 = -double.Parse(splitted[1]);
-                            else Number1 = double.Parse(splitted[0]);
-                            if (splitted.Count() == 4) Number2 = -double.Parse(splitted[3]);
-                            else if (splitted[0] != "" && splitted.Count() == 3) Number2 = -double.Parse(splitted[2]);
-                            else Number2 = double.Parse(splitted[1]);
-
-                            _task = _task.Replace(intermediateTask2, (Number1 - Number2).ToString());
-
-                            intermediateTask2 = regex.Match(_task).ToString();
-                        }
+                        if (new Regex(@"\d").IsMatch(c.ToString()))
+                            newPattern = newPattern + c;
+                        else
+                            newPattern = newPattern + "\\" + c;
                     }
+                    task = new Regex(newPattern).Replace(task, result.ToString("N5").Replace(',', '.'), 1);
                 }
-                return double.Parse(_task);
+
+
+                if (new Regex(@"^\-?\d+(\.\d+)$").IsMatch(task))
+                    return double.Parse(task.Replace(',', '.'), CultureInfo.InvariantCulture);
+                else
+                    return double.NaN;
             }
-            return double.NaN;
+            else
+                return double.NaN;
         }
     }
 }
