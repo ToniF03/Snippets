@@ -24,11 +24,11 @@ namespace uCalc.Math.Units.Patterns
 {
     public static class Pattern
     {
-        public static readonly string MassPattern = @"(\b((?i)(ton(s)?|kilogram(s)?|gram(s)|milligram(s)?|microgram(s)?|long ton(s)?|short ton(s)?|stone(s)?|pound(s)?|ounce(s)?)(?-i)|(t|kg|g|mg|µg|lt|tn|st|lb(s)?))\b|oz\.?)";
+        public static readonly string MassPattern = @"(\b((?i)(ton|kilogram|gram|milligram|microgram|long ton|short ton|stone(s)?|pound(s)?|ounce)(?-i)|(t|kg|g|mg|µg|μg|lt|tn|st|lb(s)?))\b|oz\.?)";
         public static readonly string TemperaturePattern = @"(\bK\b|°\b(?i)(C|F|Ra|Re|R)(?-i)\b)";
         public static readonly string DataSizePattern = @"\b((b|(K|M|G|T|P|E)?B)|(?i)(bit|(kilo|mega|giga|tera|peta|exa)?byte)(?-i))\b";
-        public static readonly string TimePattern = @"(\b(c|yr|mth|wk|d|h|min|s|ms|μs|ns)\b|\b(?i)(centur(y|ies)|decade(s)?|year(s)?|month(s)?|week(s)?|day(s)?|hour(s)?|minute(s)?|(milli|micro|nano)?second(s)?)(?-i)\b)";
-        public static readonly string LengthPattern = @"(μm|\b(nm|mm|cm|dm|km|dam|hm|mi|m|yd|ft|in)\b|\b(?i)(nanometer|micrometer|millimeter|centimeter|decimeter|kilometer|decameter|hectometer|mile|yard|foot|feet|inch)(?-i)\b)";
+        public static readonly string TimePattern = @"(\b(c|yr|mth|wk|d|h|min|s|ms|μs|µs|ns)\b|\b(?i)(centur(y|ies)|decade(s)?|year(s)?|month(s)?|week(s)?|day(s)?|hour(s)?|minute(s)?|sec|(milli|micro|nano)?second(s)?)(?-i)\b)";
+        public static readonly string LengthPattern = @"(μm|µm|\b(nm|mm|cm|dm|km|dam|hm|mi|m|yd|ft|in)\b|\b(?i)(nanometer|micrometer|millimeter|centimeter|decimeter|kilometer|decameter|hectometer|meter|mile(s)?|yard|foot|feet|inch)(?-i)\b)";
         public static readonly string AnglePattern = @"(°|( |\b)(?i)(gon|grad|deg|mil|rad|arcmin|arcsec|gradian|degree|milliradian|radian|angular minute(s)?|angular second(s)?)(?-i)\b)";
         public static readonly string FrequencyPattern = @"((k|M|G)?Hz|(?i)((kilo|mega|giga)?hertz)(?-i))";
     }
@@ -140,75 +140,75 @@ namespace uCalc.Math.Conversion
             {
                 case AngleUnit.Gradian:
                     if (currentUnit == AngleUnit.Degree)
-                        result = Angle.Gradian.ToDegree(val);
+                        result = Angle.Degree.ToGradian(val);
                     else if (currentUnit == AngleUnit.Milliradian)
-                        result = Angle.Gradian.ToMilliradian(val);
+                        result = Angle.Milliradian.ToGradian(val);
                     else if (currentUnit == AngleUnit.Radian)
-                        result = Angle.Gradian.ToRadian(val);
+                        result = Angle.Radian.ToGradian(val);
                     else if (currentUnit == AngleUnit.AngularMinute)
-                        result = Angle.Gradian.ToAngularMinute(val);
+                        result = Angle.AngularMinute.ToGradian(val);
                     else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.Gradian.ToAngularSecond(val);
+                        result = Angle.AngularSecond.ToGradian(val);
                     break;
                 case AngleUnit.Degree:
                     if (currentUnit == AngleUnit.Gradian)
-                        result = Angle.Degree.ToGradian(val);
+                        result = Angle.Gradian.ToDegree(val);
                     else if (currentUnit == AngleUnit.Milliradian)
-                        result = Angle.Degree.ToMilliradian(val);
+                        result = Angle.Milliradian.ToDegree(val);
                     else if (currentUnit == AngleUnit.Radian)
-                        result = Angle.Degree.ToRadian(val);
+                        result = Angle.Radian.ToDegree(val);
                     else if (currentUnit == AngleUnit.AngularMinute)
-                        result = Angle.Degree.ToAngularMinute(val);
+                        result = Angle.AngularMinute.ToDegree(val);
                     else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.Degree.ToAngularSecond(val);
+                        result = Angle.AngularSecond.ToDegree(val);
                     break;
                 case AngleUnit.Milliradian:
                     if (currentUnit == AngleUnit.Gradian)
-                        result = Angle.Milliradian.ToGradian(val);
+                        result = Angle.Gradian.ToMilliradian(val);
                     else if (currentUnit == AngleUnit.Degree)
-                        result = Angle.Milliradian.ToDegree(val);
+                        result = Angle.Degree.ToMilliradian(val);
                     else if (currentUnit == AngleUnit.Radian)
-                        result = Angle.Milliradian.ToRadian(val);
+                        result = Angle.Radian.ToMilliradian(val);
                     else if (currentUnit == AngleUnit.AngularMinute)
-                        result = Angle.Milliradian.ToAngularMinute(val);
+                        result = Angle.AngularMinute.ToMilliradian(val);
                     else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.Milliradian.ToAngularSecond(val);
+                        result = Angle.AngularSecond.ToMilliradian(val);
                     break;
                 case AngleUnit.Radian:
                     if (currentUnit == AngleUnit.Gradian)
-                        result = Angle.Radian.ToGradian(val);
+                        result = Angle.Gradian.ToRadian(val);
                     else if (currentUnit == AngleUnit.Degree)
-                        result = Angle.Radian.ToDegree(val);
+                        result = Angle.Degree.ToRadian(val);
                     else if (currentUnit == AngleUnit.Milliradian)
-                        result = Angle.Radian.ToMilliradian(val);
+                        result = Angle.Milliradian.ToRadian(val);
                     else if (currentUnit == AngleUnit.AngularMinute)
-                        result = Angle.Radian.ToAngularMinute(val);
+                        result = Angle.AngularMinute.ToRadian(val);
                     else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.Radian.ToAngularSecond(val);
+                        result = Angle.AngularSecond.ToRadian(val);
                     break;
                 case AngleUnit.AngularMinute:
                     if (currentUnit == AngleUnit.Gradian)
-                        result = Angle.AngularMinute.ToGradian(val);
+                        result = Angle.Gradian.ToAngularMinute(val);
                     else if (currentUnit == AngleUnit.Degree)
-                        result = Angle.AngularMinute.ToDegree(val);
+                        result = Angle.Degree.ToAngularMinute(val);
                     else if (currentUnit == AngleUnit.Milliradian)
-                        result = Angle.AngularMinute.ToMilliradian(val);
+                        result = Angle.Milliradian.ToAngularMinute(val);
                     else if (currentUnit == AngleUnit.Radian)
-                        result = Angle.AngularMinute.ToRadian(val);
+                        result = Angle.Radian.ToAngularMinute(val);
                     else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.AngularMinute.ToAngularSecond(val);
+                        result = Angle.AngularSecond.ToAngularMinute(val);
                     break;
                 case AngleUnit.AngularSecond:
                     if (currentUnit == AngleUnit.Gradian)
-                        result = Angle.AngularSecond.ToGradian(val);
+                        result = Angle.Gradian.ToAngularSecond(val);
                     else if (currentUnit == AngleUnit.Degree)
-                        result = Angle.AngularSecond.ToDegree(val);
+                        result = Angle.Degree.ToAngularSecond(val);
                     else if (currentUnit == AngleUnit.Milliradian)
-                        result = Angle.AngularSecond.ToMilliradian(val);
+                        result = Angle.Milliradian.ToAngularSecond(val);
                     else if (currentUnit == AngleUnit.Radian)
-                        result = Angle.AngularSecond.ToRadian(val);
-                    else if (currentUnit == AngleUnit.AngularSecond)
-                        result = Angle.AngularSecond.ToAngularMinute(val);
+                        result = Angle.Radian.ToAngularSecond(val);
+                    else if (currentUnit == AngleUnit.AngularMinute)
+                        result = Angle.AngularMinute.ToAngularSecond(val);
                     break;
             }
             return result;
@@ -394,7 +394,7 @@ namespace uCalc.Math.Conversion
                         result = Frequency.Hertz.ToGigahertz(val);
                     else if (currentUnit == FrequencyUnit.Kilohertz)
                         result = Frequency.Kilohertz.ToGigahertz(val);
-                    else if (currentUnit == FrequencyUnit.Gigahertz)
+                    else if (currentUnit == FrequencyUnit.Megahertz)
                         result = Frequency.Megahertz.ToGigahertz(val);
                     break;
             }
@@ -1820,41 +1820,12 @@ namespace uCalc.Math.Conversion.Angle
         private static double pi = System.Math.PI;
         public static double ToDegree(double val)
         {
-            double result = val * 180 / pi;
-            return result;
-        }
-        public static double ToMilliradian(double val)
-        {
-            double result = val * 1000;
-            return result;
-        }
-        public static double ToRadian(double val)
-        {
-            double result = val / 1000;
-            return result;
-        }
-        public static double ToAngularMinute(double val)
-        {
-            double result = val * (60 * 180) / 1000 * pi;
-            return result;
-        }
-        public static double ToAngularSecond(double val)
-        {
-            double result = val * (3600 * 180) / 1000 * pi;
-            return result;
-        }
-    }
-    public static class Degree
-    {
-        private static double pi = System.Math.PI;
-        public static double ToGradian(double val)
-        {
             double result = val * 180 / 200;
             return result;
         }
         public static double ToMilliradian(double val)
         {
-            double result = val * 100 * pi / 200;
+            double result = val * 1000 * pi / 200;
             return result;
         }
         public static double ToRadian(double val)
@@ -1873,17 +1844,46 @@ namespace uCalc.Math.Conversion.Angle
             return result;
         }
     }
+    public static class Degree
+    {
+        private static double pi = System.Math.PI;
+        public static double ToGradian(double val)
+        {
+            double result = val * 200 / 180;
+            return result;
+        }
+        public static double ToMilliradian(double val)
+        {
+            double result = val * 1000 * pi / 180;
+            return result;
+        }
+        public static double ToRadian(double val)
+        {
+            double result = val * pi / 180;
+            return result;
+        }
+        public static double ToAngularMinute(double val)
+        {
+            double result = val * 60;
+            return result;
+        }
+        public static double ToAngularSecond(double val)
+        {
+            double result = val * 3600;
+            return result;
+        }
+    }
     public static class Milliradian
     {
         private static double pi = System.Math.PI;
         public static double ToGradian(double val)
         {
-            double result = val * 200 / 1000 * pi;
+            double result = val * 200 / (1000 * pi);
             return result;
         }
         public static double ToDegree(double val)
         {
-            double result = val * 180 / 1000 * pi;
+            double result = val * 180 / (1000 * pi);
             return result;
         }
         public static double ToRadian(double val)
@@ -1893,12 +1893,12 @@ namespace uCalc.Math.Conversion.Angle
         }
         public static double ToAngularMinute(double val)
         {
-            double result = val * (60 * 180) / 1000 * pi;
+            double result = val * (60 * 180) / (1000 * pi);
             return result;
         }
         public static double ToAngularSecond(double val)
         {
-            double result = val * (3600 * 180) / 1000 * pi;
+            double result = val * (3600 * 180) / (1000 * pi);
             return result;
         }
     }
@@ -2034,7 +2034,7 @@ namespace uCalc.Math.Conversion.DataSize
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            return val;
+            return val / 8;
         }
     }
     public static class Byte
@@ -2727,7 +2727,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToNanometer(double val)
         {
-            double result = val / 1000000;
+            double result = val * 1000000;
             return result;
         }
     }
@@ -2911,12 +2911,12 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToMicrometer(double val)
         {
-            double result = val / 1000000000;
+            double result = val * 1000000000;
             return result;
         }
         public static double ToNanometer(double val)
         {
-            double result = val / 1000000000000;
+            double result = val * 1000000000000;
             return result;
         }
     }
@@ -3070,7 +3070,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecameter(double val)
         {
-            double result = val / 161;
+            double result = val * 161;
             return result;
         }
         public static double ToKilometer(double val)
@@ -3085,7 +3085,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecimeter(double val)
         {
-            double result = val / 16093;
+            double result = val * 16093;
             return result;
         }
         public static double ToCentimeter(double val)
@@ -3196,7 +3196,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecameter(double val)
         {
-            double result = val / 10.936;
+            double result = val / 32.808;
             return result;
         }
         public static double ToKilometer(double val)
@@ -3211,7 +3211,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecimeter(double val)
         {
-            double result = val * 9.144;
+            double result = val * 3.048;
             return result;
         }
         public static double ToCentimeter(double val)
@@ -3221,17 +3221,17 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToMillimeter(double val)
         {
-            double result = val / 304.8;
+            double result = val * 304.8;
             return result;
         }
         public static double ToMicrometer(double val)
         {
-            double result = val / 304800;
+            double result = val * 304800;
             return result;
         }
         public static double ToNanometer(double val)
         {
-            double result = val / 304800000;
+            double result = val * 304800000;
             return result;
         }
     }
@@ -3259,7 +3259,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecameter(double val)
         {
-            double result = val / 394.7;
+            double result = val / 393.701;
             return result;
         }
         public static double ToKilometer(double val)
@@ -3274,7 +3274,7 @@ namespace uCalc.Math.Conversion.Length
         }
         public static double ToDecimeter(double val)
         {
-            double result = val * 16093;
+            double result = val / 3.937;
             return result;
         }
         public static double ToCentimeter(double val)
@@ -3307,7 +3307,7 @@ namespace uCalc.Math.Conversion.Mass
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 100;
+            double result = val * 1000;
             return result;
         }
         public static double ToGrams(double val)
@@ -3342,14 +3342,14 @@ namespace uCalc.Math.Conversion.Mass
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val / 1.102;
+            double result = val * 1.102;
             return result;
         }
         public static double ToStones(double val)
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val / 157.473;
+            double result = val * 157.473;
             return result;
         }
         public static double ToPounds(double val)
@@ -4026,7 +4026,9 @@ namespace uCalc.Math.Conversion.NumeralSystem
         {
             if (!new Regex("^(0x)?[0-9a-fA-F]+$").IsMatch(hexadecimal))
                 return Convert.ToInt32(hexadecimal, 2);
-            return Convert.ToInt32(hexadecimal.Split('x')[1], 16);
+            if (hexadecimal.StartsWith("0x"))
+                hexadecimal = hexadecimal.Substring(2);
+            return Convert.ToInt32(hexadecimal, 16);
         }
         public static string ToBinary(string hexadecimal)
         {
@@ -4536,21 +4538,21 @@ namespace uCalc.Math.Conversion.Time
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 521.43;
+            double result = val / 521.43;
             return result;
         }
         public static double ToYears(double val)
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 52.143;
+            double result = val / 52.143;
             return result;
         }
         public static double ToMonths(double val)
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 4.345;
+            double result = val / 4.345;
             return result;
         }
         public static double ToDays(double val)
@@ -4564,7 +4566,7 @@ namespace uCalc.Math.Conversion.Time
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 420;
+            double result = val * 168;
             return result;
         }
         public static double ToMinutes(double val)
@@ -4992,14 +4994,14 @@ namespace uCalc.Math.Conversion.Time
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 1000000;
+            double result = val * 1000;
             return result;
         }
         public static double ToNanoseconds(double val)
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 1000000000;
+            double result = val * 1000000;
             return result;
         }
     }
@@ -5072,14 +5074,14 @@ namespace uCalc.Math.Conversion.Time
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 1000000000;
+            double result = val / 1000;
             return result;
         }
         public static double ToNanoseconds(double val)
         {
             if (double.IsNaN(val))
                 throw new ArgumentException();
-            double result = val * 1000000000000;
+            double result = val * 1000;
             return result;
         }
     }
@@ -5220,8 +5222,31 @@ namespace uCalc.Math
         /// <returns></returns>
         public static double DateTimeToUnixTimeStamp(DateTime dateTime)
         {
-            double unixTimeStamp = (dateTime.Subtract(new DateTime(1970, 1, 1))).TotalSeconds;
+            double unixTimeStamp = dateTime.Subtract(new DateTime(1970, 1, 1)).TotalSeconds;
             return unixTimeStamp;
+        }
+
+        /// <summary>
+        /// To save some time we create all Regex' at the beginning and give them to the calculator later
+        /// </summary>
+        /// <returns>A dictionary with all Regex'</returns>
+        public static Dictionary<string, Regex> RegexDict()
+        {
+            Dictionary<string, Regex> dict = new Dictionary<string, Regex>();
+            dict.Add("Arithmetics", new Regex(@"(^-)?\d+(\.\d+)?(\+|-)\d+(\.\d+)?"));
+            dict.Add("Brackets", new Regex(@"\(-?\d+(\.\d+)?(((\+|-|\*|\:)\d+(\.\d+)?)+)\)"));
+            dict.Add("Factorial", new Regex(@"\d+(\.\d+)?\!"));
+            dict.Add("Geometrics", new Regex(@"(\(-\d+(\.\d+)?\)|(^-)?\d+(\.\d+)?)(\*|\/)(\(-\d+(\.\d+)?\)|\d+(\.\d+)?)"));
+            dict.Add("GeoOperators", new Regex(@"(\*|\/)"));
+            dict.Add("MinusInBrackets", new Regex(@"^\(-\d+(\.\d+)?\)"));
+            dict.Add("Negatives", new Regex(@"(\+|-)\(-?\d+(\.\d+)?\)"));
+            dict.Add("Numbers", new Regex(@"^-?\d+(\.\d+)?$"));
+            dict.Add("NumbersInBetween", new Regex(@"(^-)?\d+(\.\d+)?"));
+            dict.Add("NumbersInBrackets", new Regex(@"\(\d+(\.\d+)?\)"));
+            dict.Add("Powers", new Regex(@"((\d+\.)?\d+-?\^\d+(\.\d+)?)"));
+            dict.Add("Syntax", new Regex(@"^((\d+(\.\d+)?)|(\+|-|\*|\/|\^)(?!\+|\*|\/|\^|\!)|(|\(|\)|\!))*$"));
+            dict.Add("WrongBrackets", new Regex(@"\(\D*\)"));
+            return dict;
         }
 
         /// <summary>
@@ -5229,105 +5254,107 @@ namespace uCalc.Math
         /// </summary>
         /// <param name="task">The task string to be calculated</param>
         /// <returns></returns>
-        public static double CalculateString(string task)
+        public static double CalculateString(string task, Dictionary<string, Regex> givenRegex)
         {
-            if (!new Regex(@"^(\d+(\.\d+)?|\+|\-|\*|\/|\^|\(|\)|\!)*$").IsMatch(task) && !new Regex(@"^\-?\d+(\.\d+)?$").IsMatch(task))
-                throw new ArgumentException();
+            // Check if it is just a number and save some steps
+            if (givenRegex["Numbers"].IsMatch(task)) return double.Parse(task, CultureInfo.InvariantCulture);
 
+            // Throw a new Argument Exception when there is a wrong syntax
+            if (!givenRegex["Syntax"].IsMatch(task)) throw new ArgumentException();
+
+            // Detect empty brackets
+            if (givenRegex["WrongBrackets"].IsMatch(task)) return double.NaN;
+
+            // Trim the end and beginning
             task = task.Trim();
+
+            // Remove useless brackets
+            foreach (Match match in givenRegex["NumbersInBrackets"].Matches(task))
+                task = task.Replace(match.Value, match.Value.Substring(1, match.Value.Length - 2));
+
+            // Remove brackets from negatives at the beginning
+            if (givenRegex["MinusInBrackets"].IsMatch(task))
+            {
+                int sequenceLength = givenRegex["MinusInBrackets"].Match(task).Value.Length;
+                task = task.Substring(1, sequenceLength - 2) + task.Substring(sequenceLength);
+            }
+
+            // Remove double spaces
             while (task.Contains("  "))
                 task = task.Replace("  ", "");
 
-            bool unclosedBrackets = task.Count(c => c == '(') != task.Count(c => c == ')');
-            bool onlyValidCharacters = new Regex(@"^(\d+(\.\d+)?|\+|\-|\*|\/|\^|\(|\)|\!)*$").IsMatch(task);
-            bool wrongFormat = new Regex(@"((\+|\-|\*|\/|\(|^)(!|\^|\)|$)|(\^|\/|\()($|!|\+|\*|\/|\))|(\/|\*)(\/|\*)|\d\(|\)\d|\($)").IsMatch(task);
-            bool rightSyntax = onlyValidCharacters && !wrongFormat && !unclosedBrackets;
-            if (rightSyntax)
-            {
-                // Factorial
-                foreach (Match match in new Regex(@"(\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)!").Matches(task))
-                {
-                    string subTask = match.Value.Substring(0, match.Value.Length - 1);
-                    if (subTask.StartsWith("("))
-                        subTask.Substring(1);
-                    if (subTask.StartsWith("-"))
-                        task = "0";
-                    else
-                        task = task.Replace(match.Value, Functions.Factorial(double.Parse(subTask, CultureInfo.InvariantCulture)).ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""));
-                }
-
-                // Powers
-                foreach (Match match in new Regex(@"(\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)\^(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)").Matches(task))
-                {
-                    string[] splittedTask = match.Value.Split('^');
-                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
-                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
-                    double result = System.Math.Pow(firstNumber, secondNumber);
-                    if ((firstNumber < 0 && secondNumber < 0) || (firstNumber > 0 && secondNumber < 0 && secondNumber % 2 != 0))
-                        result = result * -1;
-
-                    task = task.Replace(match.Value, result.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""));
-                }
-
-                // Brackets
-                while (task.Contains('('))
-                {
-                    string subtask = new Regex(@"\((\d|\.|\+|\-|\*|\/)*\)").Match(task).Value;
-                    task = task.Replace(subtask, CalculateString(subtask.Substring(1, subtask.Length - 2)).ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""));
-                }
-
-                // Multiply / Divide
-                while (task.Contains('*') || task.Contains('/'))
-                {
-                    string subtask = new Regex(@"((\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)(\*|\/)(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)){1}").Match(task).Value;
-                    char op = subtask.Contains("*") ? '*' : '/';
-                    string[] splittedTask = subtask.Split(op);
-                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
-                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
-                    double result = op == '*' ? firstNumber * secondNumber : firstNumber / secondNumber;
-                    //task = task.Replace(subtask, result.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""));
-                    char[] subtask2Chars = subtask.ToCharArray();
-                    string newPattern = "";
-                    foreach (char c in subtask2Chars)
-                    {
-                        if (new Regex(@"\d").IsMatch(c.ToString()))
-                            newPattern = newPattern + c;
-                        else
-                            newPattern = newPattern + "\\" + c;
-                    }
-                    task = new Regex(newPattern).Replace(task, result.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""), 1);
-                }
-
-                // Summation / Substraction
-                while ((task.Contains('+') || task.Contains('-')) && !(new Regex(@"^\-\d+(\.\d+)?$").IsMatch(task)))
-                {
-                    string subtask = new Regex(@"((\(\-\d+(\.\d+)?\)|^\-\d+(\.\d+)?|\d+(\.\d+)?)(\+|\-)(\(\-\d+(\.\d+)?\)|\-?\d+(\.\d+)?)){1}").Match(task).Value;
-                    char op = subtask.Contains("+") ? '+' : '-';
-                    string[] splittedTask = subtask.Split(op);
-                    double firstNumber = splittedTask[0].StartsWith("(") && splittedTask[0].EndsWith(")") ? double.Parse(splittedTask[0].Substring(1, splittedTask[0].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[0], CultureInfo.InvariantCulture);
-                    double secondNumber = splittedTask[1].StartsWith("(") && splittedTask[1].EndsWith(")") ? double.Parse(splittedTask[1].Substring(1, splittedTask[1].Length - 2), CultureInfo.InvariantCulture) : double.Parse(splittedTask[1], CultureInfo.InvariantCulture);
-                    double result = op == '+' ? firstNumber + secondNumber : firstNumber - secondNumber;
-                    //task = task.Replace(subtask, result.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""));
-                    char[] subtask2Chars = subtask.ToCharArray();
-                    string newPattern = "";
-                    foreach (char c in subtask2Chars)
-                    {
-                        if (new Regex(@"\d").IsMatch(c.ToString()))
-                            newPattern = newPattern + c;
-                        else
-                            newPattern = newPattern + "\\" + c;
-                    }
-                    task = new Regex(newPattern).Replace(task, result.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""), 1);
-                }
-
-
-                if (new Regex(@"^\-?\d+(\.\d+)?$").IsMatch(task))
-                    return double.Parse(task, CultureInfo.InvariantCulture);
-                else
-                    return double.NaN;
-            }
-            else
+            // Detect unclosed brackets
+            if (task.Count(c => c == '(') != task.Count(c => c == ')'))
                 return double.NaN;
+
+            // Factorial
+            MatchCollection FactorialMatches = givenRegex["Factorial"].Matches(task);
+            foreach (Match match in FactorialMatches) {
+                string factSubTask = match.Value;
+                double factResult = double.Parse(factSubTask.Substring(0, factSubTask.Length - 1), CultureInfo.InvariantCulture);
+                factResult = Functions.Factorial(factResult);
+                task = givenRegex["Factorial"].Replace(task, factResult.ToString("N10", CultureInfo.InvariantCulture).Replace(",", ""), 1);
+            }
+
+            // Remove useless brackets again...
+            foreach (Match match in givenRegex["NumbersInBrackets"].Matches(task))
+                task = task.Replace(match.Value, match.Value.Substring(1, match.Value.Length - 2));
+
+            // Power
+            while (givenRegex["Powers"].IsMatch(new string(task.Reverse().ToArray())))
+            {
+                string powSubTask = new string(givenRegex["Powers"].Match(new string(task.Reverse().ToArray())).Value.Reverse().ToArray());
+                string powFirstPart = powSubTask.Split('^')[0];
+                string powSecondPart = powSubTask.Split('^')[1];
+                double powBase = double.Parse(powFirstPart, CultureInfo.InvariantCulture);
+                double powExponent = double.Parse(powSecondPart, CultureInfo.InvariantCulture);
+                double powResult = System.Math.Pow(powBase, powExponent);
+                task = new string(givenRegex["Powers"].Replace(new string(task.Reverse().ToArray()), new string(powResult.ToString("N10", CultureInfo.InvariantCulture).Replace(",", "").Reverse().ToArray()), 1).Reverse().ToArray());
+            }
+
+            // Brackets
+            while (givenRegex["Brackets"].IsMatch(task) || givenRegex["Negatives"].IsMatch(task))
+            {
+                string match = givenRegex["Negatives"].Match(task).Value;
+                if (match != "")
+                {
+                    if ((match.StartsWith("+") || match.StartsWith("-")) && match.Substring(2, 1) == "-")
+                        task = givenRegex["Negatives"].Replace(task, match.StartsWith("+") ? "-" + match.Substring(3, match.Length - 4) : "+" + match.Substring(3, match.Length - 4));
+                    else
+                        task = givenRegex["Negatives"].Replace(task, match.Substring(0, 1) + match.Substring(2, match.Length - 3));
+                }
+
+                match = givenRegex["Brackets"].Match(task).Value;
+                if (match != "")
+                {
+                    double bracketResult = CalculateString(match.Substring(1, match.Length - 2), givenRegex);
+                    task = task.Replace(match, bracketResult < 0 ? "(" + bracketResult.ToString("N10", CultureInfo.InvariantCulture) + ")" : bracketResult.ToString("N10", CultureInfo.InvariantCulture));
+                }
+            }
+
+            // Geometrics
+            while (givenRegex["Geometrics"].IsMatch(task))
+            {
+                string geoSubTask = givenRegex["Geometrics"].Match(task).Value;
+                //string geoFirstPart = geoSubTask.Substring(0, 1) == "-" ? geoSubTask.Substring(1);
+                string[] geoParts = givenRegex["GeoOperators"].Split(task);
+                double geoFirstPart = double.Parse(geoParts[0], CultureInfo.InvariantCulture);
+                double geoSecondPart = geoParts[2].StartsWith("(") ? double.Parse(geoParts[2].Substring(1, geoParts[2].Length - 2), CultureInfo.InvariantCulture) : double.Parse(geoParts[2], CultureInfo.InvariantCulture);
+                if (geoSecondPart == 0) return double.NaN;
+                double geoResult = geoParts[1] == "*" ? geoFirstPart * geoSecondPart : geoFirstPart / geoSecondPart;
+                task = givenRegex["Geometrics"].Replace(task, geoResult.ToString("N10", CultureInfo.InvariantCulture), 1);
+            }
+
+            // Arithmetics
+            while (givenRegex["Arithmetics"].IsMatch(task))
+            {
+                string aritSubTask = givenRegex["Arithmetics"].Match(task).Value;
+                MatchCollection aritParts = givenRegex["NumbersInBetween"].Matches(aritSubTask);
+                task = givenRegex["Arithmetics"].Replace(task, aritSubTask.Substring(aritParts[0].Value.Length, 1) == "+" ? (double.Parse(aritParts[0].Value, CultureInfo.InvariantCulture) + double.Parse(aritParts[1].Value, CultureInfo.InvariantCulture)).ToString("N10", CultureInfo.InvariantCulture) : (double.Parse(aritParts[0].Value, CultureInfo.InvariantCulture) - double.Parse(aritParts[1].Value, CultureInfo.InvariantCulture)).ToString("N10", CultureInfo.InvariantCulture), 1);
+            }
+
+            if (task.StartsWith("+")) task = task.Substring(1);
+            return givenRegex["Numbers"].IsMatch(task) ? double.Parse(task, CultureInfo.InvariantCulture) : double.NaN;
         }
     }
 }
