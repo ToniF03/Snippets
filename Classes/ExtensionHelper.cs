@@ -7,8 +7,6 @@ using System.Security.Principal;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace uCalc
-{
     public static class ExtensionHelper
     {
         /// <summary>
@@ -60,4 +58,3 @@ namespace uCalc
             }
         }
     }
-}
