@@ -2,8 +2,6 @@ using Microsoft.Win32;
 using System;
 using System.Windows.Threading;
 
-namespace uCalc.Tools
-{
     class RegistryWatcher
     {
         DispatcherTimer Timer = new DispatcherTimer();
@@ -73,4 +71,3 @@ namespace uCalc.Tools
                 Value = newValue;
         }
     }
-}
