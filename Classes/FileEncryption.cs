@@ -2,7 +2,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
-public static class SaveEncryption
+public static class FileEncryption
 {
     private static readonly string key = "Your32CharKeyHere1234567890abcd"; // Must be 32 chars
     private static readonly string iv = "Your16CharIVHere"; // Must be 16 chars
