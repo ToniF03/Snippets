@@ -6,8 +6,15 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Windows.Interop;
 
+    /// <summary>
+    /// Contains native Windows COM interfaces and classes for working with shell links (.lnk files).
+    /// Provides P/Invoke declarations and enumerations for shortcut manipulation.
+    /// </summary>
     static internal class NativeClasses
     {
+        /// <summary>
+        /// Flags for IShellLink::Resolve method that control link resolution behavior.
+        /// </summary>
         [Flags]
         internal enum SLR_MODE : uint
         {
@@ -21,6 +28,9 @@ using System.Windows.Interop;
             SLR_NO_UI_WITH_MSG_PUMP = 0x101
         }
 
+        /// <summary>
+        /// Storage access mode flags for IPersistFile operations.
+        /// </summary>
         [Flags]
         internal enum STGM_ACCESS : uint
         {
@@ -44,6 +54,9 @@ using System.Windows.Interop;
             STGM_DELETEONRELEASE = 0x04000000
         }
 
+        /// <summary>
+        /// Represents a Windows FILETIME structure.
+        /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 0)]
         internal struct _FILETIME
         {
@@ -51,6 +64,9 @@ using System.Windows.Interop;
             public uint dwHighDateTime;
         }
 
+        /// <summary>
+        /// Contains information about a file found by the FindFirstFile, FindFirstFileEx, or FindNextFile functions.
+        /// </summary>
         [StructLayout(LayoutKind.Sequential, Pack = 4, Size = 0, CharSet = CharSet.Unicode)]
         internal struct _WIN32_FIND_DATAW
         {
@@ -70,10 +86,15 @@ using System.Windows.Interop;
             public string cAlternateFileName;
         }
 
-        internal const uint SLGP_SHORTPATH = 0x01;
-        internal const uint SLGP_UNCPRIORITY = 0x02;
-        internal const uint SLGP_RAWPATH = 0x04;
+        // Flags for IShellLink::GetPath method
+        internal const uint SLGP_SHORTPATH = 0x01;      // Return short (8.3 format) path
+        internal const uint SLGP_UNCPRIORITY = 0x02;    // Prioritize UNC path over drive letter
+        internal const uint SLGP_RAWPATH = 0x04;        // Return raw path without resolving
 
+        /// <summary>
+        /// COM interface for Windows Shell Link objects (.lnk files).
+        /// Provides methods to create, modify, and query shortcut properties.
+        /// </summary>
         [ComImport()]
         [Guid("000214F9-0000-0000-C000-000000000046")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -136,6 +157,10 @@ using System.Windows.Interop;
             int SetPath([MarshalAs(UnmanagedType.LPWStr)] string pszFile);
         }
 
+        /// <summary>
+        /// COM interface for persisting objects to storage (files).
+        /// Used to save and load shell links.
+        /// </summary>
         [ComImport()]
         [Guid("0000010B-0000-0000-C000-000000000046")]
         [InterfaceType(ComInterfaceType.InterfaceIsIUnknown)]
@@ -160,35 +185,60 @@ using System.Windows.Interop;
             int GetCurFile([Out(), MarshalAs(UnmanagedType.LPWStr)] StringBuilder pszIconPath);
         }
 
+        /// <summary>
+        /// COM class for creating shell link objects.
+        /// </summary>
         [Guid("00021401-0000-0000-C000-000000000046")]
         [ClassInterface(ClassInterfaceType.None)]
         [ComImport()]
         private class CShellLink { }
 
+        /// <summary>
+        /// Factory method to create a new IShellLinkW instance.
+        /// </summary>
+        /// <returns>A new shell link interface.</returns>
         internal static NativeClasses.IShellLinkW CreateShellLink()
         {
             return (NativeClasses.IShellLinkW)new NativeClasses.CShellLink();
         }
     }
 
+/// <summary>
+/// Provides a managed wrapper for creating and manipulating Windows shell links (.lnk files).
+/// Encapsulates the COM interfaces for easier use from C# code.
+/// </summary>
 public class Shortcut
 {
+    // Maximum length for shortcut descriptions
     private const int MAX_DESCRIPTION_LENGTH = 512;
+    
+    // Maximum path length for file paths
     private const int MAX_PATH = 512;
 
+    // The underlying COM shell link interface
     private NativeClasses.IShellLinkW _link;
 
+    /// <summary>
+    /// Initializes a new instance of the Shortcut class.
+    /// </summary>
     public Shortcut()
     {
         this._link = NativeClasses.CreateShellLink();
     }
 
+    /// <summary>
+    /// Initializes a new instance of the Shortcut class with a target path.
+    /// </summary>
+    /// <param name="path">The target path for the shortcut.</param>
     public Shortcut(string path)
         : this()
     {
         Marshal.ThrowExceptionForHR(this._link.SetPath(path));
     }
 
+    /// <summary>
+    /// Gets or sets the target path of the shortcut.
+    /// </summary>
     public string Path
     {
         get
@@ -204,6 +254,9 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Gets or sets the description text for the shortcut.
+    /// </summary>
     public string Description
     {
         get
@@ -218,6 +271,9 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Sets the relative path for the shortcut (write-only property).
+    /// </summary>
     public string RelativePath
     {
         set
@@ -226,6 +282,9 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Gets or sets the working directory for the shortcut target.
+    /// </summary>
     public string WorkingDirectory
     {
         get
@@ -240,6 +299,9 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Gets or sets the command-line arguments passed to the shortcut target.
+    /// </summary>
     public string Arguments
     {
         get
@@ -254,6 +316,9 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Gets or sets the keyboard shortcut (hot key) for the shortcut.
+    /// </summary>
     public ushort HotKey
     {
         get
@@ -268,32 +333,55 @@ public class Shortcut
         }
     }
 
+    /// <summary>
+    /// Resolves the shortcut, attempting to find the target even if it has moved.
+    /// </summary>
+    /// <param name="hwnd">Handle to parent window for UI.</param>
+    /// <param name="flags">Resolution behavior flags.</param>
     public void Resolve(IntPtr hwnd, uint flags)
     {
         Marshal.ThrowExceptionForHR(this._link.Resolve(hwnd, flags));
     }
 
+    /// <summary>
+    /// Resolves the shortcut using a WinForms window as the parent.
+    /// </summary>
+    /// <param name="window">The parent window.</param>
     public void Resolve(IWin32Window window)
     {
         this.Resolve(window.Handle, 0);
     }
 
+    /// <summary>
+    /// Resolves the shortcut silently without showing any UI.
+    /// </summary>
     public void Resolve()
     {
         this.Resolve(IntPtr.Zero, (uint)NativeClasses.SLR_MODE.SLR_NO_UI);
     }
 
+    /// <summary>
+    /// Gets the shell link as an IPersistFile interface for file operations.
+    /// </summary>
     private NativeClasses.IPersistFile AsPersist
     {
         get { return ((NativeClasses.IPersistFile)this._link); }
     }
 
+    /// <summary>
+    /// Saves the shortcut to a file.
+    /// </summary>
+    /// <param name="fileName">The path where the .lnk file will be saved.</param>
     public void Save(string fileName)
     {
         int hres = this.AsPersist.Save(fileName, true);
         Marshal.ThrowExceptionForHR(hres);
     }
 
+    /// <summary>
+    /// Loads an existing shortcut from a file.
+    /// </summary>
+    /// <param name="fileName">The path to the .lnk file to load.</param>
     public void Load(string fileName)
     {
         int hres = this.AsPersist.Load(fileName, (uint)NativeClasses.STGM_ACCESS.STGM_READ);
