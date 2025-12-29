@@ -1,60 +1,164 @@
+using System;
 using System.IO;
 using System.Security.Cryptography;
 using System.Text;
 
 /// <summary>
-/// Provides AES encryption and decryption functionality for text data.
-/// Uses a symmetric encryption algorithm with a fixed key and initialization vector.
-/// WARNING: The hardcoded key and IV should be replaced with secure key management in production.
+/// Secure file/string encryption helper.
+/// - Uses AES-GCM (authenticated encryption) when available.
+/// - Does NOT contain hard-coded keys. Keys should be loaded from a protected file
+///   (DPAPI / ProtectedData on Windows) or from an environment variable as Base64.
+/// Usage:
+///  - Create key file: FileEncryption.CreateAndSaveProtectedKey(pathToProtectedKeyFile);
+///  - Load key: var key = FileEncryption.LoadKeyFromProtectedFile(path);
+///  - Encrypt: var b64 = FileEncryption.EncryptToBase64("secret", key);
+///  - Decrypt: var plain = FileEncryption.DecryptFromBase64(b64, key);
+///
+/// Note: This code targets modern .NET that provides `AesGcm`. For older frameworks,
+/// use a vetted library or upgrade. On Windows this uses DPAPI via ProtectedData to
+/// protect the raw key blob.
 /// </summary>
 public static class FileEncryption
 {
-    // AES encryption key - MUST be exactly 32 characters (256 bits)
-    private static readonly string key = "Your32CharKeyHere1234567890abcd";
-    
-    // Initialization Vector - MUST be exactly 16 characters (128 bits)
-    private static readonly string iv = "Your16CharIVHere";
+    private const int KeySize = 32; // 256 bits
+    private const int NonceSize = 12; // 96 bits recommended for GCM
+    private const int TagSize = 16; // 128-bit tag
 
     /// <summary>
-    /// Encrypts plain text using AES encryption algorithm.
+    /// Generates a new random 256-bit key and saves it protected with DPAPI to `protectedKeyPath`.
+    /// The resulting file will contain the DPAPI-protected key bytes. This file should be
+    /// stored in a location with restricted permissions (e.g. user profile) and backed up securely.
     /// </summary>
-    /// <param name="plainText">The text to encrypt.</param>
-    /// <returns>Encrypted data as a byte array.</returns>
-    public static byte[] Encrypt(string plainText)
+    public static void CreateAndSaveProtectedKey(string protectedKeyPath)
     {
-        // Create AES encryption instance
-        using Aes aes = Aes.Create();
-        aes.Key = Encoding.UTF8.GetBytes(key);  // Convert key string to bytes
-        aes.IV = Encoding.UTF8.GetBytes(iv);    // Convert IV string to bytes
+        if (string.IsNullOrWhiteSpace(protectedKeyPath)) throw new ArgumentNullException(nameof(protectedKeyPath));
 
-        // Create encryptor and encrypt the data
-        using var encryptor = aes.CreateEncryptor(aes.Key, aes.IV);
-        using var ms = new MemoryStream();
-        using var cs = new CryptoStream(ms, encryptor, CryptoStreamMode.Write);
-        using (var sw = new StreamWriter(cs))
-        {
-            sw.Write(plainText);  // Write plain text to crypto stream
-        }
-        return ms.ToArray();  // Return encrypted bytes
+        var key = new byte[KeySize];
+        RandomNumberGenerator.Fill(key);
+
+        // Protect key for current user (Windows DPAPI)
+        var protectedKey = ProtectedData.Protect(key, null, DataProtectionScope.CurrentUser);
+
+        Directory.CreateDirectory(Path.GetDirectoryName(protectedKeyPath) ?? ".");
+        File.WriteAllBytes(protectedKeyPath, protectedKey);
     }
 
     /// <summary>
-    /// Decrypts encrypted data back to plain text using AES decryption.
+    /// Loads and unprotects a DPAPI-protected key file created by CreateAndSaveProtectedKey.
+    /// Throws if the key length is unexpected.
     /// </summary>
-    /// <param name="cipherData">The encrypted byte array to decrypt.</param>
-    /// <returns>The decrypted plain text string.</returns>
-    public static string Decrypt(byte[] cipherData)
+    public static byte[] LoadKeyFromProtectedFile(string protectedKeyPath)
     {
-        // Create AES decryption instance
-        using Aes aes = Aes.Create();
-        aes.Key = Encoding.UTF8.GetBytes(key);  // Convert key string to bytes
-        aes.IV = Encoding.UTF8.GetBytes(iv);    // Convert IV string to bytes
+        if (string.IsNullOrWhiteSpace(protectedKeyPath)) throw new ArgumentNullException(nameof(protectedKeyPath));
+        if (!File.Exists(protectedKeyPath)) throw new FileNotFoundException("Protected key file not found.", protectedKeyPath);
 
-        // Create decryptor and decrypt the data
-        using var decryptor = aes.CreateDecryptor(aes.Key, aes.IV);
-        using var ms = new MemoryStream(cipherData);
-        using var cs = new CryptoStream(ms, decryptor, CryptoStreamMode.Read);
-        using var sr = new StreamReader(cs);
-        return sr.ReadToEnd();  // Return decrypted text
+        var protectedKey = File.ReadAllBytes(protectedKeyPath);
+        var key = ProtectedData.Unprotect(protectedKey, null, DataProtectionScope.CurrentUser);
+        if (key == null || key.Length != KeySize) throw new CryptographicException("Invalid key length or corrupted key file.");
+        return key;
+    }
+
+    /// <summary>
+    /// Attempts to load key from environment variable `envVarName` (Base64) first,
+    /// then falls back to a DPAPI-protected file at `protectedKeyPath`. Throws if none found.
+    /// </summary>
+    public static byte[] LoadKeyFromEnvironmentOrFile(string envVarName, string protectedKeyPath)
+    {
+        if (!string.IsNullOrEmpty(envVarName))
+        {
+            var env = Environment.GetEnvironmentVariable(envVarName);
+            if (!string.IsNullOrEmpty(env))
+            {
+                try
+                {
+                    var key = Convert.FromBase64String(env);
+                    if (key.Length == KeySize) return key;
+                }
+                catch { /* ignore and fallback */ }
+            }
+        }
+
+        if (!string.IsNullOrEmpty(protectedKeyPath) && File.Exists(protectedKeyPath))
+        {
+            return LoadKeyFromProtectedFile(protectedKeyPath);
+        }
+
+        throw new InvalidOperationException("No encryption key found. Create one using CreateAndSaveProtectedKey or set an environment variable.");
+    }
+
+    /// <summary>
+    /// Encrypts the provided UTF-8 string and returns a Base64 string containing: nonce|tag|ciphertext
+    /// (concatenated bytes). Always uses a fresh random nonce per encryption.
+    /// </summary>
+    public static string EncryptToBase64(string plainText, byte[] key)
+    {
+        if (plainText == null) throw new ArgumentNullException(nameof(plainText));
+        var plaintextBytes = Encoding.UTF8.GetBytes(plainText);
+        var combined = EncryptBytes(plaintextBytes, key);
+        return Convert.ToBase64String(combined);
+    }
+
+    /// <summary>
+    /// Encrypts raw bytes and returns combined output: nonce (12) + tag (16) + ciphertext.
+    /// </summary>
+    public static byte[] EncryptBytes(byte[] plaintext, byte[] key)
+    {
+        if (plaintext == null) throw new ArgumentNullException(nameof(plaintext));
+        if (key == null || key.Length != KeySize) throw new ArgumentException("Key must be 32 bytes.", nameof(key));
+
+        var nonce = new byte[NonceSize];
+        RandomNumberGenerator.Fill(nonce);
+
+        var ciphertext = new byte[plaintext.Length];
+        var tag = new byte[TagSize];
+
+        using (var aesGcm = new AesGcm(key))
+        {
+            aesGcm.Encrypt(nonce, plaintext, ciphertext, tag, null);
+        }
+
+        var combined = new byte[NonceSize + TagSize + ciphertext.Length];
+        Buffer.BlockCopy(nonce, 0, combined, 0, NonceSize);
+        Buffer.BlockCopy(tag, 0, combined, NonceSize, TagSize);
+        Buffer.BlockCopy(ciphertext, 0, combined, NonceSize + TagSize, ciphertext.Length);
+        return combined;
+    }
+
+    /// <summary>
+    /// Decrypts a Base64 string created by EncryptToBase64 and returns the UTF-8 plain text.
+    /// </summary>
+    public static string DecryptFromBase64(string base64Data, byte[] key)
+    {
+        if (base64Data == null) throw new ArgumentNullException(nameof(base64Data));
+        var combined = Convert.FromBase64String(base64Data);
+        var plain = DecryptBytes(combined, key);
+        return Encoding.UTF8.GetString(plain);
+    }
+
+    /// <summary>
+    /// Decrypts combined bytes produced by EncryptBytes. Expects nonce + tag + ciphertext.
+    /// </summary>
+    public static byte[] DecryptBytes(byte[] combined, byte[] key)
+    {
+        if (combined == null) throw new ArgumentNullException(nameof(combined));
+        if (key == null || key.Length != KeySize) throw new ArgumentException("Key must be 32 bytes.", nameof(key));
+        if (combined.Length < NonceSize + TagSize) throw new CryptographicException("Invalid encrypted data.");
+
+        var nonce = new byte[NonceSize];
+        var tag = new byte[TagSize];
+        var ciphertextLen = combined.Length - NonceSize - TagSize;
+        var ciphertext = new byte[ciphertextLen];
+
+        Buffer.BlockCopy(combined, 0, nonce, 0, NonceSize);
+        Buffer.BlockCopy(combined, NonceSize, tag, 0, TagSize);
+        Buffer.BlockCopy(combined, NonceSize + TagSize, ciphertext, 0, ciphertextLen);
+
+        var plaintext = new byte[ciphertextLen];
+        using (var aesGcm = new AesGcm(key))
+        {
+            aesGcm.Decrypt(nonce, ciphertext, tag, plaintext, null);
+        }
+
+        return plaintext;
     }
 }
